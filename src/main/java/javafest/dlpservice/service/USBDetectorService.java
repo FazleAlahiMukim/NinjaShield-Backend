@@ -15,11 +15,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class USBDetectorService {
     private List<String> usbDrives;
     private final Map<String, Future<?>> runningServices = new HashMap<>();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private static final Logger logger = LoggerFactory.getLogger(USBDetectorService.class);
 
     @PostConstruct
     public void init() {
@@ -33,7 +37,7 @@ public class USBDetectorService {
         if (!currentUsbDrives.equals(usbDrives)) {
             updateServices(currentUsbDrives);
             usbDrives = new ArrayList<>(currentUsbDrives);
-            System.out.println("USB drives: " + usbDrives);
+            logger.info("USB drives updated: " + usbDrives);
         }
     }
 
@@ -76,7 +80,7 @@ public class USBDetectorService {
             Future<?> future = runningServices.remove(drive);
             if (future != null) {
                 future.cancel(true);
-                System.out.println("Service stopped for drive: " + drive);
+                logger.info("Service stopped for usb drive: " + drive);
             }
         }
 
@@ -85,7 +89,7 @@ public class USBDetectorService {
         for (String drive : newDrives) {
             Future<?> future = executorService.submit(new USBMonitorService(drive));
             runningServices.put(drive, future);
-            System.out.println("Service started for drive: " + drive);
+            logger.info("Service started for usb drive: " + drive);
         }
     }
 }
