@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-
 @SpringBootApplication
 @EnableScheduling
 public class DLP_ServiceApplication {
