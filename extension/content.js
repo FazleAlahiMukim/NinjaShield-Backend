@@ -1,18 +1,25 @@
 // Function to process files
+
+// changed-2
 function processFiles(files, event) {
   if (files.length > 0) {
     const file = files[0];
     const fileReader = new FileReader();
     fileReader.onload = function (e) {
       const fileContent = e.target.result;
+
+      console.log("Sending message");
       chrome.runtime.sendMessage({ type: 'checkFile', content: fileContent }, (response) => {
-        if (response.shouldBlock) {
+        console.log("Message sent and came back to content.js");
+
+        if (response && response.shouldBlock) {
           alert('File upload blocked: contains sensitive keyword');
           event.preventDefault();  // Prevent the default action
           event.stopPropagation();  // Stop the event from propagating further
           if (event.target.tagName === 'INPUT') {
             event.target.value = '';  // Clear the file input
           }
+          chrome.runtime.sendMessage({ type: 'closeTab' });
         }
       });
     };
