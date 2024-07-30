@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,7 +63,7 @@ public class USBDetectorService {
 
         IntByReference lpBytesReturned = new IntByReference();
         Kernel32.DISK_GEOMETRY_EX dg = new Kernel32.DISK_GEOMETRY_EX();
-        boolean result = Kernel32.INSTANCE.DeviceIoControl(hDevice, Kernel32.IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, 
+        boolean result = Kernel32.INSTANCE.DeviceIoControl(hDevice, Kernel32.IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
                 Pointer.NULL, 0, dg.getPointer(), dg.size(), lpBytesReturned, Pointer.NULL);
         dg.read();
         Kernel32.INSTANCE.CloseHandle(hDevice);
@@ -87,9 +88,13 @@ public class USBDetectorService {
         // Start services for newly added USB drives
         newDrives.removeAll(usbDrives);
         for (String drive : newDrives) {
-            Future<?> future = executorService.submit(new USBMonitorService(drive));
-            runningServices.put(drive, future);
-            logger.info("Service started for usb drive: " + drive);
+            try {
+                Future<?> future = executorService.submit(new USBMonitorService(drive));
+                runningServices.put(drive, future);
+                logger.info("Service started for usb drive: " + drive);
+            } catch (IOException e) {
+                logger.error("Failed to start service for usb drive: " + drive, e);
+            }
         }
     }
 }
