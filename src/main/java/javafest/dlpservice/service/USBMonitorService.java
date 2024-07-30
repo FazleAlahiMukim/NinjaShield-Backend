@@ -2,6 +2,9 @@ package javafest.dlpservice.service;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -18,28 +21,46 @@ public class USBMonitorService implements Runnable {
     private static final int RETRY_DELAY_MS = 100; // set low value to seamlessly delete the file
 
     private final String usbPath;
+    private final WatchService watchService;
+    private final Map<WatchKey, Path> keys;
 
-    public USBMonitorService(String usbPath) {
+    public USBMonitorService(String usbPath) throws IOException {
         this.usbPath = usbPath;
+        this.watchService = FileSystems.getDefault().newWatchService();
+        this.keys = new HashMap<>();
     }
 
     @Override
     public void run() {
         try {
-            monitorDirectory(Paths.get(usbPath));
+            registerAll(Paths.get(usbPath));
+            processEvents();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             Thread.currentThread().interrupt();
         }
     }
 
-    public void monitorDirectory(Path path) throws IOException, InterruptedException {
-        logger.info("Monitoring USB directory: " + path);
-        WatchService watchService = FileSystems.getDefault().newWatchService();
-        path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+    // Register the given directory, and all its sub-directories.
+    private void registerAll(final Path start) throws IOException {
+        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                register(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 
-        WatchKey key;
+    // Register the given directory with the WatchService
+    private void register(Path dir) throws IOException {
+        WatchKey key = dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+        keys.put(key, dir);
+    }
+
+    private void processEvents() throws InterruptedException, IOException {
         while (!Thread.currentThread().isInterrupted()) {
+            WatchKey key;
             try {
                 // Use poll with timeout instead of take to check for interruptions
                 key = watchService.poll(10, TimeUnit.SECONDS);
@@ -51,20 +72,46 @@ public class USBMonitorService implements Runnable {
                 break;
             }
 
+            Path dir = keys.get(key);
+            if (dir == null) {
+                continue;
+            }
+
             for (WatchEvent<?> event : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
-                Path filePath = path.resolve((Path) event.context());
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                    logger.info("File created: " + filePath);
-                    if (containsKeyword(filePath, "secretKeyword")) {
-                        String fileName = filePath.getFileName().toString();
-                        logger.warn("Restricted data detected in file: " + fileName);
+                Path name = (Path) event.context();
+                Path child = dir.resolve(name);
 
-                        // check if file exists before deleting
-                        if (Files.exists(filePath)) {
-                            Files.delete(filePath);
-                            RefreshExplorer.execute();
-                            notificationService.notifyUser("Restricted data detected in file: " + fileName);
+                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                    if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
+                        registerAll(child);
+                    } else {
+                        logger.info("File created: " + child);
+                        if (containsKeyword(child, "secretKeyword")) {
+                            String fileName = child.getFileName().toString();
+                            logger.warn("Restricted data detected in file: " + fileName);
+
+                            // check if file exists before deleting
+                            if (Files.exists(child)) {
+                                Files.delete(child);
+                                RefreshExplorer.execute();
+                                notificationService.notifyUser("Restricted data detected in file: " + fileName);
+                            }
+                        }
+                    }
+                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                    if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
+                        logger.info("File modified: " + child);
+                        if (containsKeyword(child, "secretKeyword")) {
+                            String fileName = child.getFileName().toString();
+                            logger.warn("Restricted data detected in file: " + fileName);
+
+                            // check if file exists before deleting
+                            if (Files.exists(child)) {
+                                Files.delete(child);
+                                RefreshExplorer.execute();
+                                notificationService.notifyUser("Restricted data detected in file: " + fileName);
+                            }
                         }
                     }
                 }
@@ -72,7 +119,10 @@ public class USBMonitorService implements Runnable {
 
             boolean valid = key.reset();
             if (!valid) {
-                break;
+                keys.remove(key);
+                if (keys.isEmpty()) {
+                    break; // all directories are inaccessible
+                }
             }
         }
         watchService.close();
