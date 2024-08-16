@@ -54,7 +54,8 @@ public class USBMonitorService implements Runnable {
 
     // Register the given directory with the WatchService
     private void register(Path dir) throws IOException {
-        WatchKey key = dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+        WatchKey key = dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY);
         keys.put(key, dir);
     }
 
