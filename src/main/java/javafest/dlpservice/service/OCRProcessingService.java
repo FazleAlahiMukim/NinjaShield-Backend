@@ -5,11 +5,10 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,35 +18,30 @@ public class OCRProcessingService {
     private static final Logger logger = LoggerFactory.getLogger(OCRProcessingService.class);
     private final ITesseract tesseract;
 
-    // Path to the directory and file
-    private final Path directoryPath = Paths
-            .get("D:/therap/NinjaShield-Backend/src/main/java/javafest/dlpservice/service");
-    private final String fileName = "test.png";
+    // Path to the captured image
+    private final Path capturedImagePath = Paths.get("D:/therap/NinjaShield-Backend/captured", "captured.png");
 
     public OCRProcessingService() {
-        logger.info("!!!!!!!!!!!!!!!!!!!!!!OCRProcessingService initialized!!!!!!!!!!!!!!!!!!!!");
+        logger.info("OCRProcessingService initialized");
 
         tesseract = new Tesseract();
         tesseract.setDatapath("D:/Apps/tesseractOCR/tessdata"); // Ensure this path is correct
     }
 
-    // This method will now run every 1 second
-    @Scheduled(fixedRate = 1000)
-    public void processImagesInDirectory() {
-        logger.info("Starting OCR processing for file: " + fileName);
+    @Async
+    public void processCapturedImage() {
+        logger.info("Starting OCR processing for captured image...");
 
         try {
-            Path filePath = directoryPath.resolve(fileName);
-            if (Files.exists(filePath)) {
-                processImage(filePath.toFile());
+            File imageFile = capturedImagePath.toFile();
+            if (imageFile.exists()) {
+                processImage(imageFile);
             } else {
-                logger.warn("File not found: " + filePath.toString());
+                logger.warn("Captured image not found: " + capturedImagePath);
             }
         } catch (Exception e) {
-            logger.error("Failed to process file: " + fileName, e);
+            logger.error("Failed to process captured image", e);
         }
-
-        logger.info("Finished OCR processing for file: " + fileName);
     }
 
     private void processImage(File imageFile) {
@@ -55,7 +49,7 @@ public class OCRProcessingService {
 
         try {
             String result = tesseract.doOCR(imageFile);
-            logger.info("OCR result for " + imageFile.getName() + ": " + result);
+            logger.info("OCR result: " + result);
         } catch (TesseractException e) {
             logger.error("Error during OCR processing for image: " + imageFile.getName(), e);
         }
