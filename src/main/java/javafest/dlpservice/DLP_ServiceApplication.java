@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-// @EnableAsync
+@EnableAsync
 @SpringBootApplication
 @EnableScheduling
 public class DLP_ServiceApplication {
