@@ -1,6 +1,7 @@
-// Function to process files
+// Handles interactions within the webpage, such as detecting file uploads, 
+// sending content to the background script, 
+// and receiving responses to block the upload if necessary.
 
-// changed-2
 function processFiles(files, event) {
   if (files.length > 0) {
     const file = files[0];
@@ -9,11 +10,12 @@ function processFiles(files, event) {
       const fileContent = e.target.result;
 
       console.log("Sending message");
+
       chrome.runtime.sendMessage({ type: 'checkFile', content: fileContent }, (response) => {
         console.log("Message sent and came back to content.js");
 
         if (response && response.shouldBlock) {
-          alert('File upload blocked: contains sensitive keyword');
+          alert('File upload blocked <content>');
           event.preventDefault();  // Prevent the default action
           event.stopPropagation();  // Stop the event from propagating further
           if (event.target.tagName === 'INPUT') {
@@ -27,23 +29,38 @@ function processFiles(files, event) {
   }
 }
 
-// Observe for file input changes
-const observer = new MutationObserver(mutations => {
-  mutations.forEach(mutation => {
-    mutation.addedNodes.forEach(node => {
-      if (node.tagName === 'INPUT' && node.type === 'file') {
-        node.addEventListener('change', (event) => {
-          processFiles(event.target.files, event);
-        });
-      }
-    });
+// Function to block sending an email, show a notification, and close the tab
+function blockEmailAndCloseTab(event) {
+  const target = event.target;
+
+  // Check if the clicked button is the Gmail Send button
+  if (target.getAttribute('aria-label') === 'Send ‪(Ctrl-Enter)‬' ||
+    target.getAttribute('data-tooltip')?.includes('Send')) {
+    alert('Sending email blocked.');
+
+    // Prevent the default action (sending the email)
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Close the tab
+    chrome.runtime.sendMessage({ type: 'closeTab' });
+  }
+}
+
+// Observe the document body for clicks and filter for the Send button
+document.body.addEventListener('click', blockEmailAndCloseTab, true);
+
+// Improved MutationObserver to continuously monitor for Gmail Send button
+const observer = new MutationObserver(() => {
+  // Initial scan for the Gmail Send button and attach event listener
+  document.querySelectorAll('div[role="button"][data-tooltip*="Send"]').forEach(button => {
+    button.addEventListener('click', blockEmailAndCloseTab, true);
   });
 });
 
-// Observe the document body for added nodes
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Initial scan for existing file inputs
+// Existing file processing logic
 document.querySelectorAll('input[type="file"]').forEach(input => {
   input.addEventListener('change', (event) => {
     processFiles(event.target.files, event);

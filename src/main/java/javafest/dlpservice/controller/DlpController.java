@@ -8,7 +8,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class DlpController {
 
-    @PostMapping("/check")
+    @PostMapping("/blkupload")
     public Map<String, Boolean> checkFile(@RequestBody Map<String, String> request) {
         String fileContent = request.get("fileContent");
         boolean containsKeyword = fileContent.contains("secretKeyword");
