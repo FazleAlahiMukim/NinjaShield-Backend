@@ -1,4 +1,8 @@
 // background.js
+// Acts as the background script for the extension, 
+// handling messages from the content script and managing interactions
+// such as making API calls and closing tabs.
+
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension Installed');
@@ -9,7 +13,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     console.log("INSIDE CHECKFILE")
 
-    fetch('http://localhost:8080/api/check', {
+    //? To DlpController.java
+    fetch('http://localhost:8080/api/blkupload', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -23,8 +28,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           chrome.notifications.create({
             type: 'basic',
             iconUrl: 'icons/icon48.png',
-            title: 'Keyword Detected',
-            message: 'The file contains the keyword: secretKeyword',
+            title: 'NinjaShield',
+            message: 'The file contains the keyword <background>',
             priority: 2
           });
         }
