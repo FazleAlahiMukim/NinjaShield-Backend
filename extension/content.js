@@ -2,6 +2,8 @@
 // sending content to the background script, 
 // and receiving responses to block the upload if necessary.
 
+
+// KeyWord Detector
 function processFiles(files, event) {
   if (files.length > 0) {
     const file = files[0];
@@ -36,14 +38,24 @@ function blockEmailAndCloseTab(event) {
   // Check if the clicked button is the Gmail Send button
   if (target.getAttribute('aria-label') === 'Send ‪(Ctrl-Enter)‬' ||
     target.getAttribute('data-tooltip')?.includes('Send')) {
+
+
     alert('Sending email blocked.');
 
     // Prevent the default action (sending the email)
     event.preventDefault();
     event.stopPropagation();
 
+
     // Close the tab
     chrome.runtime.sendMessage({ type: 'closeTab' });
+
+
+    console.log("REACHED HERE")
+    // Send a GET request to DlpController to trigger a notification
+    fetch('http://localhost:8080/api/blkemail', { method: 'GET' })
+      .then(response => console.log('Notification triggered'))
+      .catch(error => console.error('Error triggering notification:', error));
   }
 }
 
