@@ -36,7 +36,7 @@ public class DlpController {
     @Async
     public void showNotification() {
         // Use NotificationUtility to show a notification
-        logger.info("!!!!!!hubbaba sending blocked!!!!!!!");
+        logger.info("Email sending blocked");
 
         notificationUtility.notifyUser("Email sending blocked!", "Email");
     }
