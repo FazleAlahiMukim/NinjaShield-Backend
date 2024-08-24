@@ -23,7 +23,7 @@ public class PythonScriptService {
     @Scheduled(fixedRate = 10000)
     @Async
     public void runPythonScript() {
-        logger.info("!!!!!!!!Running Python script to check for screen sharing!!!!!!!!!!");
+        // logger.info("!!!!!!!!Running Python script to check for screen sharing!!!!!!!!!!");
 
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("C:/Python312/python.exe",
