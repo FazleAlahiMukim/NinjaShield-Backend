@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import javafest.dlpservice.dbservices.DemoDBService;
+import javafest.dlpservice.model.Device;
 import javafest.dlpservice.service.OCRProcessingService;
 import javafest.dlpservice.utils.NotificationUtility;
 
@@ -13,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.List;
+
+
 @RestController
 @RequestMapping("/api")
 public class DlpController {
@@ -21,6 +26,9 @@ public class DlpController {
 
     @Autowired
     private NotificationUtility notificationUtility;
+
+    @Autowired
+    private DemoDBService demoDBService;
 
     @PostMapping("/blkupload")
     public Map<String, Boolean> checkFile(@RequestBody Map<String, String> request) {
@@ -36,9 +44,14 @@ public class DlpController {
     @Async
     public void showNotification() {
         // Use NotificationUtility to show a notification
-        logger.info("!!!!!!hubbaba sending blocked!!!!!!!");
+        logger.info("Email sending blocked");
 
         notificationUtility.notifyUser("Email sending blocked!", "Email");
+    }
+
+    @GetMapping("/devices/{userId}")
+    public List<Device> getDevicesByUserId(@PathVariable String userId) {
+        return demoDBService.getDevicesByUserId(userId);
     }
 
 }
