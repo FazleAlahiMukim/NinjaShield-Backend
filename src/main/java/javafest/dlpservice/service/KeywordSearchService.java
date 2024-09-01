@@ -29,7 +29,7 @@ public class KeywordSearchService {
             logger.info("Keyword '{}' found in file '{}': {}", keyword, fileName, found);
             return found;
         } catch (IOException e) {
-            logger.error("Error reading file: " + filePath.toString(), e);
+            // logger.error("Error reading file: " + filePath.toString(), e);
             return false;
         }
     }

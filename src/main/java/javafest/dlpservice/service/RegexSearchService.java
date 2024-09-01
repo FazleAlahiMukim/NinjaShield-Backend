@@ -27,10 +27,10 @@ public class RegexSearchService {
         try {
             String content = new String(Files.readAllBytes(filePath));
             boolean found = Pattern.compile(regex).matcher(content).find();
-            logger.info("Regex '{}' found in file '{}': {}", regex, fileName, found);
+            // logger.info("Regex '{}' found in file '{}': {}", regex, fileName, found);
             return found;
         } catch (IOException e) {
-            logger.error("Error reading file: " + filePath.toString(), e);
+            // logger.error("Error reading file: " + filePath.toString(), e);
             return false;
         }
     }

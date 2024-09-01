@@ -1,3 +1,1 @@
-This is a test file containing some text.
-Here is a Social Security Number: 123-45-6789.
-And here is a Health Insurance Number.
+Health Insurance Number
