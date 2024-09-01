@@ -15,7 +15,7 @@ import javafest.dlpservice.model.Rule;
 import javafest.dlpservice.repository.RuleRepository;
 
 @Service
-public class ExampleUsageService {
+public class RuleHitService {
 
     @Autowired
     private RuleRepository ruleRepository;

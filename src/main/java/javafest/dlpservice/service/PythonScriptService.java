@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 public class PythonScriptService {
 
     private static final Logger logger = LoggerFactory.getLogger(PythonScriptService.class);
+
     private final OCRProcessingService ocrProcessingService;
 
     public PythonScriptService(OCRProcessingService ocrProcessingService) {
@@ -39,7 +40,9 @@ public class PythonScriptService {
                     logger.info("<Service Notification:> Screen sharing detected, starting OCR processing...");
 
                     // Trigger OCR processing on the captured image
-                    ocrProcessingService.processCapturedImage();
+
+                    // ocrProcessingService.processCapturedImage();
+
                     break;
                 }
             }
