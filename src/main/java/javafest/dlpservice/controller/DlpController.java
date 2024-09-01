@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import javafest.dlpservice.dbservices.DemoDBService;
 import javafest.dlpservice.model.Device;
 import javafest.dlpservice.service.OCRProcessingService;
-import javafest.dlpservice.service.RegexService;
+// import javafest.dlpservice.service.RegexService;
 import javafest.dlpservice.utils.NotificationUtility;
 
 import org.slf4j.Logger;
@@ -30,8 +30,8 @@ public class DlpController {
     @Autowired
     private DemoDBService demoDBService;
 
-    @Autowired
-    private RegexService regexService;
+    // @Autowired
+    // private RegexService regexService;
 
     @PostMapping("/blkupload")
     public Map<String, Boolean> checkFile(@RequestBody Map<String, String> request) {
@@ -57,9 +57,9 @@ public class DlpController {
         return demoDBService.getDevicesByUserId(userId);
     }
 
-    @GetMapping("/validate")
-    public boolean validateStringWithRegex(@RequestParam String regex, @RequestParam String input) {
-        return regexService.doesStringMatchRegex(regex, input);
-    }
+    // @GetMapping("/validate")
+    // public boolean validateStringWithRegex(@RequestParam String regex, @RequestParam String input) {
+    //     return regexService.doesStringMatchRegex(regex, input);
+    // }
 
 }
