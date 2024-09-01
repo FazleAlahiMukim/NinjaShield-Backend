@@ -2,6 +2,7 @@ package javafest.dlpservice.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
+@Async
 public class KeywordSearchService {
 
     private static final Logger logger = LoggerFactory.getLogger(KeywordSearchService.class);
@@ -26,7 +28,7 @@ public class KeywordSearchService {
         try {
             String content = new String(Files.readAllBytes(filePath));
             boolean found = content.contains(keyword);
-            logger.info("Keyword '{}' found in file '{}': {}", keyword, fileName, found);
+            // logger.info("Keyword '{}' found in file '{}': {}", keyword, fileName, found);
             return found;
         } catch (IOException e) {
             // logger.error("Error reading file: " + filePath.toString(), e);

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
-import javafest.dlpservice.dbservices.DemoDBService;
 import javafest.dlpservice.model.Device;
 import javafest.dlpservice.service.OCRProcessingService;
 // import javafest.dlpservice.service.RegexService;
@@ -27,8 +26,8 @@ public class DlpController {
     @Autowired
     private NotificationUtility notificationUtility;
 
-    @Autowired
-    private DemoDBService demoDBService;
+    // @Autowired
+    // private DemoDBService demoDBService;
 
     // @Autowired
     // private RegexService regexService;
@@ -52,10 +51,10 @@ public class DlpController {
         notificationUtility.notifyUser("Email sending blocked!", "Email");
     }
 
-    @GetMapping("/devices/{userId}")
-    public List<Device> getDevicesByUserId(@PathVariable String userId) {
-        return demoDBService.getDevicesByUserId(userId);
-    }
+    // @GetMapping("/devices/{userId}")
+    // public List<Device> getDevicesByUserId(@PathVariable String userId) {
+    //     return demoDBService.getDevicesByUserId(userId);
+    // }
 
     // @GetMapping("/validate")
     // public boolean validateStringWithRegex(@RequestParam String regex, @RequestParam String input) {
