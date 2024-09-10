@@ -1,9 +1,9 @@
 package javafest.dlpservice.service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+// import java.io.IOException;
+// import java.nio.file.Files;
+// import java.nio.file.Path;
+// import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +13,16 @@ import org.springframework.stereotype.Service;
 
 import javafest.dlpservice.model.Rule;
 import javafest.dlpservice.repository.RuleRepository;
+import javafest.dlpservice.utils.KeyRegSearchUtil;
 
-@Service
+// @Service
 public class RuleHitService {
 
     @Autowired
     private RuleRepository ruleRepository;
 
     @Autowired
-    private KeywordSearchService keywordSearchService;
-
-    @Autowired
-    private RegexSearchService regexSearchService;
+    private KeyRegSearchUtil keyRegSearchUtil;
 
     @Scheduled(fixedRate = 10000)
     @Async
@@ -44,9 +42,9 @@ public class RuleHitService {
             for (Rule.Element element : rule.getElements()) {
                 // Check if the element type is "keyword"
                 if ("keyword".equalsIgnoreCase(element.getType())) {
-                    // Use KeywordSearchService to check for keywords in the file
+                    // Use KeyRegSearchUtil to check for keywords in the file
                     for (String keyword : element.getText()) {
-                        if (keywordSearchService.searchKeywordInFile(directory, fileName, keyword)) {
+                        if (keyRegSearchUtil.searchKeywordInFile(directory, fileName, keyword)) {
                             keywordFound = true;
                             System.out.println("!!!!!!!!!!!!!!!Keyword found: " + rule.getName());
                         }
@@ -54,9 +52,9 @@ public class RuleHitService {
                 }
                 // Check if the element type is "regex"
                 if ("regex".equalsIgnoreCase(element.getType())) {
-                    // Use RegexSearchService to check for regex patterns in the file
+                    // Use KeyRegSearchUtil to check for regex patterns in the file
                     for (String pattern : element.getText()) {
-                        if (regexSearchService.searchRegexInFile(directory, fileName, pattern)) {
+                        if (keyRegSearchUtil.searchRegexInFile(directory, fileName, pattern)) {
                             regexFound = true;
                             System.out.println("!!!!!!!!!!!!!!!!!Regex pattern matched: " + rule.getName());
                         }
