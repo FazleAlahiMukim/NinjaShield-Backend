@@ -18,7 +18,7 @@ public class ClipboardScanService {
     private static final Logger logger = LoggerFactory.getLogger(ClipboardScanService.class);
     private static final String KEYWORD = "Keyword"; // Define the keyword to search for
 
-    @Scheduled(fixedRate = 2000) // Scans clipboard every 5 seconds
+    // @Scheduled(fixedRate = 2000) // Scans clipboard every 5 seconds
     @Async
     public void scanClipboard() {
         try {

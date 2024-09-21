@@ -31,7 +31,7 @@ function processFiles(files, event) {
   }
 }
 
-// Function to block sending an email, show a notification, and close the tab
+// Function to block sending an email, read the body, and close the tab
 function blockEmailAndCloseTab(event) {
   const target = event.target;
 
@@ -39,6 +39,16 @@ function blockEmailAndCloseTab(event) {
   if (target.getAttribute('aria-label') === 'Send ‪(Ctrl-Enter)‬' ||
     target.getAttribute('data-tooltip')?.includes('Send')) {
 
+    // Extract the email body content from Gmail's DOM
+    const emailBody = document.querySelector('div[aria-label="Message Body"]');
+
+    if (emailBody) {
+      // Log the email body content to the console
+      const bodyText = emailBody.innerText || emailBody.textContent;
+      console.log("Email Body:", bodyText);
+    } else {
+      console.log("Email Body not found.");
+    }
 
     alert('Sending email blocked.');
 
@@ -46,18 +56,18 @@ function blockEmailAndCloseTab(event) {
     event.preventDefault();
     event.stopPropagation();
 
-
     // Close the tab
     chrome.runtime.sendMessage({ type: 'closeTab' });
 
+    console.log("REACHED HERE");
 
-    console.log("REACHED HERE")
     // Send a GET request to DlpController to trigger a notification
     fetch('http://localhost:8080/api/blkemail', { method: 'GET' })
       .then(response => console.log('Notification triggered'))
       .catch(error => console.error('Error triggering notification:', error));
   }
 }
+
 
 // Observe the document body for clicks and filter for the Send button
 document.body.addEventListener('click', blockEmailAndCloseTab, true);
