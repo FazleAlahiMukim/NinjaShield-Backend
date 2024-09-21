@@ -18,18 +18,24 @@ public class ClipboardScanService {
     private static final Logger logger = LoggerFactory.getLogger(ClipboardScanService.class);
     private static final String KEYWORD = "Keyword"; // Define the keyword to search for
 
-    // @Scheduled(fixedRate = 2000) // Scans clipboard every 5 seconds
+    @Scheduled(fixedRate = 2000) // Scans clipboard every 2 seconds
     @Async
     public void scanClipboard() {
         try {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            String clipboardContent = (String) clipboard.getData(DataFlavor.stringFlavor);
+            
+            // Check if clipboard contains string data
+            if (clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+                String clipboardContent = (String) clipboard.getData(DataFlavor.stringFlavor);
 
-            if (clipboardContent != null && clipboardContent.contains(KEYWORD)) {
-                logger.info("!!!!!!!!!! KeyWord found in clipboard content !!!!!!!!!!");
-                // You can add more actions here if needed
+                if (clipboardContent != null && clipboardContent.contains(KEYWORD)) {
+                    logger.info("!!!!!!!!!! KeyWord found in clipboard content !!!!!!!!!!");
+                    // You can add more actions here if needed
+                } else {
+                    logger.info("KeyWord not found in clipboard.");
+                }
             } else {
-                logger.info("KeyWord not found in clipboard.");
+                logger.info("Clipboard does not contain text.");
             }
 
         } catch (UnsupportedFlavorException | IOException e) {
