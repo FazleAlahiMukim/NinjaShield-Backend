@@ -5,7 +5,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import javafest.dlpservice.model.Device;
-import javafest.dlpservice.service.OCRProcessingService;
+// import javafest.dlpservice.service.OCRProcessingService;
 // import javafest.dlpservice.service.RegexService;
 import javafest.dlpservice.utils.NotificationUtility;
 

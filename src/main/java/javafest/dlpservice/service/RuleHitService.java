@@ -1,9 +1,9 @@
 package javafest.dlpservice.service;
 
-// import java.io.IOException;
-// import java.nio.file.Files;
-// import java.nio.file.Path;
-// import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import javafest.dlpservice.model.Rule;
 import javafest.dlpservice.repository.RuleRepository;
 import javafest.dlpservice.utils.KeyRegSearchUtil;
 
-// @Service
+@Service
 public class RuleHitService {
 
     @Autowired
@@ -24,7 +24,7 @@ public class RuleHitService {
     @Autowired
     private KeyRegSearchUtil keyRegSearchUtil;
 
-    @Scheduled(fixedRate = 10000)
+    // @Scheduled(fixedRate = 10000)
     @Async
     public void processFiles() {
         String directory = "D:/therap/NinjaShield-Backend";
@@ -64,9 +64,9 @@ public class RuleHitService {
 
             // Logging the overall results for the rule
             // if (keywordFound || regexFound) {
-            //     System.out.println("Rule matched: " + rule.getName());
+            // System.out.println("Rule matched: " + rule.getName());
             // } else {
-            //     System.out.println("No match found for rule: " + rule.getName());
+            // System.out.println("No match found for rule: " + rule.getName());
             // }
         }
     }
