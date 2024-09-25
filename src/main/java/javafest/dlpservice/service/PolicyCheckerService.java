@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+// @Service
 public class PolicyCheckerService {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyCheckerService.class);
