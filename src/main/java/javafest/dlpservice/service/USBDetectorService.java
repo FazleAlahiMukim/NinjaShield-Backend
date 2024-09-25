@@ -19,7 +19,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// @Service
+@Service
 public class USBDetectorService {
     private List<String> usbDrives;
     private final Map<String, Future<?>> runningServices = new HashMap<>();

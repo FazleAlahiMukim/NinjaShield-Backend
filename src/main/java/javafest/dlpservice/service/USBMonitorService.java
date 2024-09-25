@@ -96,7 +96,8 @@ public class USBMonitorService implements Runnable {
                             if (Files.exists(child)) {
                                 Files.delete(child);
                                 RefreshExplorer.execute();
-                                notificationService.notifyUser("Restricted data detected", fileName, "/icons/usb.png");
+                                notificationService.notifyUser("Action Blocked", "File Contains Sensitive Data",
+                                        "/icons/usb.png");
                             }
                         }
                     }

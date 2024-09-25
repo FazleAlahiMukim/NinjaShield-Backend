@@ -2,6 +2,7 @@ package javafest.dlpservice.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javafest.dlpservice.utils.NotificationUtility;
+
 @Service
 public class OneDriveMonitorService {
 
@@ -23,8 +26,13 @@ public class OneDriveMonitorService {
     // "C:\\Users\\tonmoy\\OneDrive - BUET";
     private final String ONE_DRIVE_DIRECTORY = findOneDriveDirectory();
 
+    private static final String ICON_PATH = "/icons/onedrive.png"; // Define the icon directory
+
     private Set<String> knownFiles = new HashSet<>();
     private static final Logger logger = LoggerFactory.getLogger(OneDriveMonitorService.class);
+
+    @Autowired
+    private NotificationUtility notificationUtility;
 
     private String findOneDriveDirectory() {
         String userHome = System.getProperty("user.home");
@@ -99,6 +107,9 @@ public class OneDriveMonitorService {
                         stopFileCopy(fileName);
 
                         // Notify user
+
+                        notificationUtility.notifyUser("Action Blocked", "Detected OneDrive Pasting", ICON_PATH);
+
                         sendNotification(fileName);
                     } catch (Exception e) {
                         logger.error("Error while handling file: " + fileName, e);
