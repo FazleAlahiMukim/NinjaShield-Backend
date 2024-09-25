@@ -48,7 +48,7 @@ public class DlpController {
         // Use NotificationUtility to show a notification
         logger.info("Email sending blocked");
 
-        notificationUtility.notifyUser("Email sending blocked!", "Email");
+        notificationUtility.notifyUser("Email sending blocked!", "Email", "/icons/email.png");
     }
 
     // @GetMapping("/devices/{userId}")

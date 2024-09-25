@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification</title>
+    <style>
+        /* Notification container */
+        .notification {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            z-index: 9999;
+        }
+
+        /* Notification header */
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-header img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .notification-header .close-btn {
+            font-size: 18px;
+            color: red;
+            cursor: pointer;
+        }
+
+        /* Notification title */
+        .notification-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Notification details */
+        .notification-details {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Notification structure -->
+    <div id="notification" class="notification" style="display: none;">
+        <div class="notification-header">
+            <img id="notification-icon" src="" alt="Icon"> <!-- Dynamically loaded icon -->
+            <span class="close-btn" onclick="closeNotification()">X</span>
+        </div>
+        <div class="notification-title" id="notification-title">Email Blocked</div>
+        <div class="notification-details" id="notification-details">Subject: Invoice</div>
+    </div>
+
+    <script>
+        // Function to show notification with dynamic content
+        function showNotification(icon, title, details) {
+            const notification = document.getElementById('notification');
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationTitle = document.getElementById('notification-title');
+            const notificationDetails = document.getElementById('notification-details');
+
+            notificationIcon.src = icon; // Set the icon dynamically
+            notificationTitle.textContent = title;
+            notificationDetails.textContent = details;
+
+            notification.style.display = 'block';
+
+            // Auto close after 5 seconds
+            setTimeout(closeNotification, 5000);
+        }
+
+        // Function to close notification
+        function closeNotification() {
+            document.getElementById('notification').style.display = 'none';
+        }
+
+        // Example: Show notification on page load
+        window.onload = function () {
+            const params = new URLSearchParams(window.location.search);
+            const icon = params.get('icon') || 'https://via.placeholder.com/24'; // Default icon if none is provided
+            const title = params.get('title') || 'Email Blocked';
+            const details = params.get('details') || 'Subject: Invoice';
+            showNotification(icon, title, details);
+        };
+    </script>
+
+</body>
+</html>

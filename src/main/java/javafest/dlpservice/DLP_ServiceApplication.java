@@ -17,7 +17,7 @@ public class DLP_ServiceApplication {
 		System.setProperty("java.awt.headless", "false");
 		SpringApplication.run(DLP_ServiceApplication.class, args);
 	}
-
+	
 	@Component
 	public class AppRunner implements CommandLineRunner {
 
