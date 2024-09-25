@@ -15,7 +15,7 @@ import javafest.dlpservice.model.Rule;
 import javafest.dlpservice.repository.RuleRepository;
 import javafest.dlpservice.utils.KeyRegSearchUtil;
 
-@Service
+// @Service
 public class RuleHitService {
 
     @Autowired
