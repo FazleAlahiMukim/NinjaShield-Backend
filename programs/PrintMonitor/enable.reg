@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Office\Word\Addins\PrintMonitor]
+"Description"="Print Monitor Add-In"
+"FriendlyName"="Print Monitor"
+"LoadBehavior"=dword:00000003
+"Manifest"="file:///G:/Javafest_2024/dlpservice/programs/PrintMonitor/PrintMonitor.vsto|vstolocal"
