@@ -13,10 +13,7 @@ public class RefreshExplorer {
         try {
             Robot robot = new Robot();
 
-            // Optional: Give the user time to focus on the File Explorer window
             // robot.delay(2000);
-
-            // Simulate pressing F5
             robot.keyPress(KeyEvent.VK_F5);
             robot.keyRelease(KeyEvent.VK_F5);
 
