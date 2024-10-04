@@ -5,34 +5,44 @@ import javafest.dlpservice.utils.Kernel32;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.IntByReference;
-import org.springframework.scheduling.annotation.Scheduled;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
+import java.util.concurrent.ScheduledFuture;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
 public class USBDetectorService {
+
+    @Autowired
+    private PolicyCheckService policyCheckService;
+
     private List<String> usbDrives;
     private final Map<String, Future<?>> runningServices = new HashMap<>();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
     private static final Logger logger = LoggerFactory.getLogger(USBDetectorService.class);
 
-    @PostConstruct
-    public void init() {
+    private ThreadPoolTaskScheduler taskScheduler;
+    private ScheduledFuture<?> scheduledTask;
+
+    public USBDetectorService() {
         usbDrives = new ArrayList<>();
-        detectAndPrintUSBDrives();
+        taskScheduler = new ThreadPoolTaskScheduler();
+        taskScheduler.initialize();
     }
 
-    @Scheduled(fixedRate = 5000)
     public void detectAndPrintUSBDrives() {
         List<String> currentUsbDrives = detectUSBDrivesWindows();
         if (!currentUsbDrives.equals(usbDrives)) {
@@ -40,6 +50,30 @@ public class USBDetectorService {
             usbDrives = new ArrayList<>(currentUsbDrives);
             logger.info("USB drives updated: " + usbDrives);
         }
+    }
+
+    public void start() {
+        if (scheduledTask == null || scheduledTask.isCancelled()) {
+            scheduledTask = taskScheduler.scheduleAtFixedRate(this::detectAndPrintUSBDrives, Duration.ofMillis(5000));
+            logger.info("USB Detection Service started.");
+        }
+    }
+
+    public void stop() {
+        if (scheduledTask != null) {
+            scheduledTask.cancel(true);
+            stopAllServices();
+            logger.info("USB Detection Service stopped.");
+        }
+    }
+
+    private void stopAllServices() {
+        for (Future<?> future : runningServices.values()) {
+            if (future != null) {
+                future.cancel(true);
+            }
+        }
+        runningServices.clear();
     }
 
     public List<String> detectUSBDrivesWindows() {
@@ -89,7 +123,7 @@ public class USBDetectorService {
         newDrives.removeAll(usbDrives);
         for (String drive : newDrives) {
             try {
-                Future<?> future = executorService.submit(new USBMonitorService(drive));
+                Future<?> future = executorService.submit(new USBMonitorService(drive, policyCheckService));
                 runningServices.put(drive, future);
                 logger.info("Service started for usb drive: " + drive);
             } catch (IOException e) {

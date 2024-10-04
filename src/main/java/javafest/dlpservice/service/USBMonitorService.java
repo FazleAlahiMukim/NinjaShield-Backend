@@ -3,31 +3,36 @@ package javafest.dlpservice.service;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafest.dlpservice.utils.NotificationUtility;
+import javafest.dlpservice.dto.Action;
 import javafest.dlpservice.utils.RefreshExplorer;
 
 public class USBMonitorService implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(USBMonitorService.class);
-    private final NotificationUtility notificationService = new NotificationUtility();
 
-    private static final int MAX_RETRIES = 50;
-    private static final int RETRY_DELAY_MS = 100; // set low value to seamlessly delete the file
+    private PolicyCheckService policyCheckService;
+
+    private static final Logger logger = LoggerFactory.getLogger(USBMonitorService.class);
 
     private final String usbPath;
     private final WatchService watchService;
     private final Map<WatchKey, Path> keys;
 
-    public USBMonitorService(String usbPath) throws IOException {
+    public USBMonitorService(String usbPath, PolicyCheckService policyCheckService) throws IOException {
         this.usbPath = usbPath;
         this.watchService = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<>();
+        this.policyCheckService = policyCheckService;
     }
 
     @Override
@@ -59,6 +64,9 @@ public class USBMonitorService implements Runnable {
         keys.put(key, dir);
     }
 
+    
+    private final Set<Path> processedFiles = Collections.newSetFromMap(new HashMap<>());
+
     private void processEvents() throws InterruptedException, IOException {
         while (!Thread.currentThread().isInterrupted()) {
             WatchKey key;
@@ -84,39 +92,42 @@ public class USBMonitorService implements Runnable {
                 Path child = dir.resolve(name);
 
                 if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                    if (processedFiles.contains(child)) {
+                        continue;
+                    }
+                    processedFiles.add(child);
                     if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
                         registerAll(child);
                     } else {
                         logger.info("File created: " + child);
-                        if (containsKeyword(child, "secretKeyword")) {
+                        Action action = search(child);
+                        if (action != null && action.getAction().equals("block")) {
                             String fileName = child.getFileName().toString();
                             logger.warn("Restricted data detected in file: " + fileName);
 
-                            // check if file exists before deleting
                             if (Files.exists(child)) {
-                                Files.delete(child);
+                                int attempts = 0;
+                                while (attempts < 10) {
+                                    try {
+                                        Files.delete(child);
+                                        break;
+                                    } catch (IOException e) {
+                                        attempts++;
+                                        try {
+                                            Thread.sleep(500);
+                                        } catch (InterruptedException interruptedException) {
+                                            Thread.currentThread().interrupt();
+                                            break;
+                                        }
+                                    }
+                                }
+                                logger.info("File deleted: " + fileName);
                                 RefreshExplorer.execute();
-                                notificationService.notifyUser("Action Blocked", "File Contains Sensitive Data",
-                                        "/icons/usb.png");
                             }
                         }
+                        scheduleFileCleanup(child);
                     }
-                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                    if (Files.isRegularFile(child, LinkOption.NOFOLLOW_LINKS)) {
-                        logger.info("File modified: " + child);
-                        if (containsKeyword(child, "secretKeyword")) {
-                            String fileName = child.getFileName().toString();
-                            logger.warn("Restricted data detected in file: " + fileName);
-
-                            // check if file exists before deleting
-                            if (Files.exists(child)) {
-                                Files.delete(child);
-                                RefreshExplorer.execute();
-                                notificationService.notifyUser("Restricted data detected", fileName, "/icons/usb.png");
-                            }
-                        }
-                    }
-                }
+                } 
             }
 
             boolean valid = key.reset();
@@ -130,30 +141,30 @@ public class USBMonitorService implements Runnable {
         watchService.close();
     }
 
-    private boolean containsKeyword(Path filePath, String keyword) throws IOException {
+    private void scheduleFileCleanup(Path child) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                processedFiles.remove(child);
+            }
+        }, TimeUnit.SECONDS.toMillis(10));
+    }
+
+    private Action search(Path filePath) throws IOException {
         int attempts = 0;
-        while (attempts < MAX_RETRIES) {
-            if (!Files.exists(filePath))
-                break;
-            try {
-                String content = new String(Files.readAllBytes(filePath));
-                if (content.contains(keyword)) {
-                    return true;
-                }
-                return false;
-            } catch (FileSystemException e) {
+        while (attempts < 50) {
+            if (!Files.exists(filePath)){
                 attempts++;
-                if (attempts >= MAX_RETRIES) {
-                    throw e;
-                }
                 try {
-                    Thread.sleep(RETRY_DELAY_MS);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                break;
             }
+            String filePathString = filePath.toString();
+            return policyCheckService.getActionForFile("Removable storage", filePathString);
         }
-        return false;
+        return null;
     }
 }
