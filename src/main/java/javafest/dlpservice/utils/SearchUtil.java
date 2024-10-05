@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.*;
+
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.text.*;
@@ -57,7 +59,29 @@ public class SearchUtil {
         }
     }
 
-    public static Map<String, Integer> searchKeywordsAndRegex(String text, List<String> keywords, List<String> regexPatterns) {
+    public static String extractTextFromPdf(byte[] pdfBytes) {
+        try (PDDocument document = PDDocument.load(pdfBytes)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String extractTextFromDocx(byte[] docxBytes) {
+        try (InputStream inputStream = new ByteArrayInputStream(docxBytes);
+                XWPFDocument doc = new XWPFDocument(inputStream);
+                XWPFWordExtractor extractor = new XWPFWordExtractor(doc)) {
+            return extractor.getText();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Map<String, Integer> searchKeywordsAndRegex(String text, List<String> keywords,
+            List<String> regexPatterns) {
         Map<String, Integer> matchCounts = new HashMap<>();
 
         for (String keyword : keywords) {
@@ -94,7 +118,7 @@ public class SearchUtil {
     private static int countOccurrences(String text, String keyword) {
         text = text.toLowerCase();
         keyword = keyword.toLowerCase();
-        
+
         int count = 0;
         int index = 0;
         while ((index = text.indexOf(keyword, index)) != -1) {
@@ -103,7 +127,7 @@ public class SearchUtil {
         }
         return count;
     }
-    
+
     private static int countRegexMatches(String text, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);

@@ -32,14 +32,18 @@ public class PolicyCheckService {
     private static final Logger logger = LoggerFactory.getLogger(PolicyCheckService.class);
 
     public Action getActionForFile(String destination, String filepath) {
-        return execute(destination, filepath, null);
+        return execute(destination, filepath, null, null);
     }
 
     public Action getActionForText(String destination, String text) {
-        return execute(destination, null, text);
+        return execute(destination, null, text, null);
     }
 
-    private Action execute(String destination, String filepath, String text) {
+    public Action getActionForWeb(String destination, String text, String fileName, String uploadUrl) {
+        return execute(destination, fileName, text, uploadUrl);
+    }
+
+    private Action execute(String destination, String filepath, String text, String destinationValue) {
         if (!ruleService.getPresentDestinations().contains(destination)) {
             return null;
         }
@@ -49,7 +53,7 @@ public class PolicyCheckService {
             return null;
         }
 
-        logEvent(rule, filepath, rule.getViolationOccurences(), destination);
+        logEvent(rule, filepath, rule.getViolationOccurences(), destination, destinationValue);
 
         String action = rule.getPolicy().getAction();
         
@@ -105,7 +109,7 @@ public class PolicyCheckService {
         return null;
     }
 
-    private void logEvent(Rule rule, String filePath, int occurrences, String destinationType) {
+    private void logEvent(Rule rule, String filePath, int occurrences, String destinationType, String destinationValue) {
         Policy policy = rule.getPolicy();
         String fileName = null;
         if (filePath != null)
@@ -119,7 +123,7 @@ public class PolicyCheckService {
                                 occurrences, 
                                 fileName, 
                                 destinationType, 
-                                null, 
+                                destinationValue, 
                                 filePath, 
                                 new Date());
         

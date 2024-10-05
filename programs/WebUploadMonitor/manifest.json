@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Web Upload Monitor",
+  "version": "1.0",
+  "description": "Blocks file uploads based on policies",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

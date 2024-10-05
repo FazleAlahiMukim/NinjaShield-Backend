@@ -6,13 +6,17 @@ import org.springframework.web.bind.annotation.*;
 import javafest.dlpservice.dto.Action;
 import javafest.dlpservice.dto.EmailRequest;
 import javafest.dlpservice.dto.FilePathRequest;
+import javafest.dlpservice.dto.FileUploadRequest;
 import javafest.dlpservice.dto.TextRequest;
-import javafest.dlpservice.service.NotificationService;
 import javafest.dlpservice.service.PolicyCheckService;
+import javafest.dlpservice.utils.SearchUtil;
+
+import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api")
 public class DLP_Controller {
@@ -21,16 +25,32 @@ public class DLP_Controller {
     private PolicyCheckService policyCheckService;
 
     private static final Logger logger = LoggerFactory.getLogger(DLP_Controller.class);
-
-    @Autowired
-    private NotificationService notificationService;
     
-    @GetMapping("/test")
-    public void testNotification() {
-        notificationService.showNotification(
-            "Removable storage", "warn", "DNI.txt"
-        );
-        return;
+    @PostMapping("/webUpload")
+    public String webUpload(@RequestBody FileUploadRequest request) {
+        logger.info("Web upload detected for file: " + request.getFileName());
+        
+        String fileContent = request.getFileContent();
+
+        if (request.getFileType().equals("pdf")) {
+            byte[] pdfBytes = Base64.getDecoder().decode(fileContent);
+            fileContent = SearchUtil.extractTextFromPdf(pdfBytes);
+        } else if (request.getFileType().equals("docx")) {
+            byte[] docxBytes = Base64.getDecoder().decode(fileContent);
+            fileContent = SearchUtil.extractTextFromDocx(docxBytes);
+        }
+
+        if (fileContent == null) {
+            logger.error("Failed to extract text from file");
+            return "OK";
+        }
+
+        Action action = policyCheckService.getActionForWeb("Web", fileContent, request.getFileName(), request.getUploadUrl());
+
+        if (action != null && action.getAction().equals("block")) {
+            return "Cancel";
+        }
+        return "OK";
     }
 
     @PostMapping("/checkEmail")
