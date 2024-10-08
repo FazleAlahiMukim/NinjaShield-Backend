@@ -11,6 +11,7 @@ import javafest.dlpservice.dto.Rule;
 import javafest.dlpservice.dto.Action;
 import javafest.dlpservice.dto.Element;
 import javafest.dlpservice.dto.Event;
+import javafest.dlpservice.dto.FileCategoryAction;
 import javafest.dlpservice.dto.Policy;
 import javafest.dlpservice.utils.SearchUtil;
 
@@ -50,6 +51,11 @@ public class PolicyCheckService {
 
         Rule rule = getViolatingRule(destination, filepath, text);
         if (rule == null) {
+            Action result = isFileCategoryMatch(destination, filepath);
+            if (result != null) {
+                notificationService.showNotification(destination, result.getAction(), filepath);
+                return result;
+            }
             return null;
         }
 
@@ -77,6 +83,10 @@ public class PolicyCheckService {
         }
 
         List<Rule> rules = ruleService.getRules(destination);
+        if (rules == null) {
+            return null;
+        }
+
         for (Rule rule : rules) {
             int occurrences = rule.getOccurrences();
             List<Element> elements = rule.getElements();
@@ -105,6 +115,50 @@ public class PolicyCheckService {
                 rule.setViolationOccurences(totalCount);
                 return rule;
             }
+        }
+        return null;
+    }
+
+    private Action isFileCategoryMatch(String destination, String filePath) {
+        List<FileCategoryAction> fileCategorieActions = ruleService.getFileCategories(destination);
+        if (fileCategorieActions == null) {
+            return null;
+        }
+
+        for (FileCategoryAction fileCategoryAction : fileCategorieActions) {
+            String fileCategory = fileCategoryAction.getFileCategory();
+
+            if (fileCategory.equals("Images")) {
+                if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg") || filePath.endsWith(".png") || filePath.endsWith(".gif")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Audio files")) {
+                if (filePath.endsWith(".mp3") || filePath.endsWith(".wav") || filePath.endsWith(".flac")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Video files")) {
+                if (filePath.endsWith(".mp4") || filePath.endsWith(".avi") || filePath.endsWith(".mkv")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Executable files")) {
+                if (filePath.endsWith(".exe") || filePath.endsWith(".msi") || filePath.endsWith(".bat")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Compressed files")) {
+                if (filePath.endsWith(".zip") || filePath.endsWith(".rar") || filePath.endsWith(".7z")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Configuration files (.ini, .log, .env ...)")) {
+                return new Action(fileCategoryAction.getAction());
+            } else if (fileCategory.equals("Spreadsheets")) {
+                if (filePath.endsWith(".xls") || filePath.endsWith(".xlsx") || filePath.endsWith(".ods")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } else if (fileCategory.equals("Presentations")) {
+                if (filePath.endsWith(".ppt") || filePath.endsWith(".pptx") || filePath.endsWith(".odp")) {
+                    return new Action(fileCategoryAction.getAction());
+                }
+            } 
         }
         return null;
     }

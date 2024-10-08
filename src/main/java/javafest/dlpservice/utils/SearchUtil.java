@@ -24,7 +24,7 @@ public class SearchUtil {
                 } else if (fileName.endsWith(".pdf")) {
                     return extractTextFromPdf(file);
                 } else {
-                    throw new IllegalArgumentException("Unsupported file type");
+                    return null;
                 }
             } catch (IOException e) {
                 attempts++;
