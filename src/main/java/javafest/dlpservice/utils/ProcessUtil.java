@@ -117,6 +117,14 @@ public class ProcessUtil {
                 exePath = "./programs/ScreenshotMonitor/ScreenshotMonitor.exe";
                 file = "ScreenshotMonitor";
                 break;
+            case "Onedrive":
+                exePath = "./programs/OnedriveMonitor/onedriveapp.exe";
+                file = "onedriveapp";
+                break;
+            case "Clipboard":
+                exePath = "./programs/ClipboardMonitor/clipboardapp.exe";
+                file = "clipboardapp";
+                break;
         }
 
         return new AbstractMap.SimpleEntry<>(exePath, file);

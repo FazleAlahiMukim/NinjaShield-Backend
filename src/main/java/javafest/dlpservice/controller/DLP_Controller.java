@@ -15,6 +15,9 @@ import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @CrossOrigin("*")
 @RestController
@@ -71,6 +74,28 @@ public class DLP_Controller {
             return "Cancel";
         return "OK";
     }
+
+    @PostMapping("/checkOnedrive")
+    public String checkOnedrive(@RequestBody FilePathRequest request) {
+        String filePath = request.getFilePath();
+        logger.info("Checking OneDrive for file: " + filePath);
+        Action action = policyCheckService.getActionForFile("Onedrive", filePath);
+
+        if (action != null && action.getAction().equals("block"))
+            return "Cancel";
+        return "OK";
+    }
+
+    @PostMapping("/checkClipboard")
+    public String checkClipboard(@RequestBody TextRequest request) {
+        String text = request.getText();
+        Action action = policyCheckService.getActionForText("Clipboard", text);
+
+        if (action != null && action.getAction().equals("block"))
+            return "Cancel";
+        return "OK";
+    }
+    
 
     @PostMapping("/printJob")
     public String checkPrint(@RequestBody FilePathRequest request) {

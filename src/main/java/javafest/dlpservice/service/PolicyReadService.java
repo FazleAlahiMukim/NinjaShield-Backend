@@ -98,6 +98,18 @@ public class PolicyReadService {
         } else {
             ProcessUtil.stop("Screenshot");
         }
+
+        if (presentDestinations.contains("Onedrive")) {
+            ProcessUtil.start("Onedrive");
+        } else {
+            ProcessUtil.stop("Onedrive");
+        }
+
+        if (presentDestinations.contains("Clipboard")) {
+            ProcessUtil.start("Clipboard");
+        } else {
+            ProcessUtil.stop("Clipboard");
+        }
     }
 }
  
