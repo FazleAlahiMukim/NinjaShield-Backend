@@ -10,7 +10,7 @@ NinjaShield Backend is the core of the Data Leak Prevention (DLP) system, built 
 ## Other Project portions 
 
 [@devicebackend](https://github.com/FazleAlahiMukim/NinjaShield-Backend) Web App Frontend
-[@adminbacckend](https://github.com/FazleAlahiMukim/NinjaShield-AdminBackend) backend web-based application & [@systemhooks\(https://github.com/FazleAlahiMukim/NinjaShield-SystemHooks) System Hooks for DLP tool
+[@adminbacckend](https://github.com/FazleAlahiMukim/NinjaShield-AdminBackend) backend web-based application & [@systemhooks](https://github.com/FazleAlahiMukim/NinjaShield-SystemHooks) System Hooks for DLP tool
 
 ## Features
 
