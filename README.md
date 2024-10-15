@@ -4,8 +4,8 @@ NinjaShield Backend is the core of the Data Leak Prevention (DLP) system, built 
 
 ## Contributors
 
-- [@fazle]([https://github.com/fazle](https://github.com/FazleAlahiMukim))
-- [@tonmoy]([https://github.com/tonmoy](https://github.com/TonmoyDaFulkopi))
+- [@fazle](https://github.com/FazleAlahiMukim)
+- [@tonmoy](https://github.com/TonmoyDaFulkopi)
 
 ## Other Project portions 
 
